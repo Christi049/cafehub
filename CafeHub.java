@@ -1,28 +1,47 @@
 import java.awt.*;
 import javax.swing.*;
-import java.awt.event.* ;
+import java.awt.event.*;
 
 class CafeHub extends JFrame implements ActionListener{
+
+  private static JTextField usernameField;
+  private static JPasswordField passwordField;
+  private static JButton loginbtn , clearbtn;
+  private static JLabel jlbl1 , jlbl2 , success;
+
+
   CafeHub(){
-    // JFrame jfrm = new JFrame("CafeHub");
-    setLayout(new FlowLayout());
-    setSize(300,300);
+    setTitle("CafeHub");
+    
+    setSize(350,200);
     setDefaultCloseOperation(EXIT_ON_CLOSE);
+    setLocationRelativeTo(null);
+    setLayout(null);
 
-    JLabel jtf1 = new JLabel("Username:");
-    JLabel jtf2 = new JLabel("Password:");
+    jlbl1 = new JLabel("Username:");
+    jlbl1.setBounds(15,20,80,25);
+    jlbl2 = new JLabel("Password:");
+    jlbl2.setBounds(15,50,80,25);
 
-    JTextField usernameField = new JTextField(20);
-    JTextField passwordField = new JTextField(20);
+    usernameField = new JTextField(20);
+    usernameField.setBounds(150,20,165,25);
+    passwordField = new JPasswordField(20);
+    passwordField.setBounds(150,50,165,25);
 
-    JButton loginbtn = new JButton("Login");
-    JButton clearbtn = new JButton("Clear")
+    loginbtn = new JButton("Login");
+    loginbtn.setBounds(89,100,80,25);
+    clearbtn = new JButton("Clear");
+    clearbtn.setBounds(167,100,80,25);
 
-    add(jtf1);
+    success = new JLabel("");
+    success.setBounds(118,125,300,25);
+    
+    add(jlbl1);
     add(usernameField);
-    add(jtf2);
+    add(jlbl2);
     add(passwordField);
     add(loginbtn);
+    add(success);
     add(clearbtn);
     
 
@@ -31,10 +50,26 @@ class CafeHub extends JFrame implements ActionListener{
 
     setVisible(true);  
   }
+
   @Override
   public void actionPerformed(ActionEvent e) {
-    System.out.println("Button clicked: " + e.getActionCommand());
+    if(e.getSource() == loginbtn){
+      String user = usernameField.getText();
+      String pass = String.valueOf(passwordField.getPassword());
+      if (user.equals("Christi") && pass.equals("Cmt049")) {
+        success.setText("login successful");
+      }
+      else{
+        success.setText("Invalid Credentials");
+      }
+      
+    }
+    else if(e.getSource() == clearbtn){
+      usernameField.setText("");
+      passwordField.setText("");
+    }
   }
+
   public static void main(String args[]){
     new CafeHub();
   }
