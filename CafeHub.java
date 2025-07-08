@@ -12,7 +12,6 @@ class CafeHub extends JFrame implements ActionListener{
 
   CafeHub(){
     setTitle("CafeHub");
-    
     setSize(350,200);
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     setLocationRelativeTo(null);
@@ -43,7 +42,6 @@ class CafeHub extends JFrame implements ActionListener{
     add(loginbtn);
     add(success);
     add(clearbtn);
-    
 
     loginbtn.addActionListener(this);
     clearbtn.addActionListener(this);
@@ -53,11 +51,13 @@ class CafeHub extends JFrame implements ActionListener{
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    if(e.getSource() == loginbtn){
+    if(e.getSource() == loginbtn){ 
       String user = usernameField.getText();
       String pass = String.valueOf(passwordField.getPassword());
       if (user.equals("Christi") && pass.equals("Cmt049")) {
         success.setText("login successful");
+        dispose(); 
+        new Dashboard();
       }
       else{
         success.setText("Invalid Credentials");
@@ -67,8 +67,8 @@ class CafeHub extends JFrame implements ActionListener{
     else if(e.getSource() == clearbtn){
       usernameField.setText("");
       passwordField.setText("");
-    }
-  }
+    } 
+  }  
 
   public static void main(String args[]){
     new CafeHub();
