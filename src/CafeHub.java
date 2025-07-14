@@ -1,9 +1,4 @@
 package src;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
-import javax.swing.JOptionPane;
-import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 
@@ -57,7 +52,7 @@ class CafeHub extends JFrame implements ActionListener{
   @Override
   public void actionPerformed(ActionEvent e) {
     if(e.getSource() == loginbtn){ 
-      /* String user = usernameField.getText();
+      String user = usernameField.getText();
       String pass = String.valueOf(passwordField.getPassword());
       if (user.equals("Christi") && pass.equals("Cmt049")) {
         success.setText("login successful");
@@ -66,8 +61,7 @@ class CafeHub extends JFrame implements ActionListener{
       }
       else{
         success.setText("Invalid Credentials");
-      } */
-       new Dashboard();
+      } 
     }
     else if(e.getSource() == clearbtn){
       usernameField.setText("");

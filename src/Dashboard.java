@@ -3,7 +3,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -13,11 +12,13 @@ public class Dashboard extends JFrame implements ActionListener{
     private static JPanel leftPanel;
     private static JPanel rightPanel;
     private static JPanel mainPanel;
+    private static JPanel contentPanel;
     private static JButton btnHome;
-    private static JButton btnOrders;
+    private JLabel totalAmount;
+
     private java.util.Map<String, Integer> receiptMap = new java.util.LinkedHashMap<>();
 
-    private void updateQuantity(JLabel quantityLabel, String dbName, int delta) {
+    private void updateQuantity(JLabel quantityLabel, String dbName, int delta ) {
         try {
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "Cmt@049");
             int qty = Integer.parseInt(quantityLabel.getText()) + delta;
@@ -37,23 +38,75 @@ public class Dashboard extends JFrame implements ActionListener{
         }
     }
 
-    private void updateReceipt() {
-        rightPanel.removeAll();
+    private int getPriceForItem(String displayName) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "Cmt@049")) {
+            String sql = "SELECT price FROM cafe_items WHERE name = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, displayName.replaceAll("[^a-zA-Z ]", "").trim()); // Remove emoji
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("price");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return 0;
+    }
 
+    private void updateReceipt() {
+        contentPanel.removeAll();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        int total = 0;
         for (java.util.Map.Entry<String, Integer> entry : receiptMap.entrySet()) {
             String item = entry.getKey();
             int qty = entry.getValue();
-            JLabel label = new JLabel(item + " x" + qty);
-            label.setFont(new Font("SansSerif", Font.PLAIN, 14));
-            label.setAlignmentX(Component.LEFT_ALIGNMENT);
-            label.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-            rightPanel.add(label);
+            if (qty <= 0) continue; 
+
+            int price = getPriceForItem(item);
+            int itemTotal = qty * price;
+            total += itemTotal;
+
+            JPanel itemRow = new JPanel();
+            itemRow.setLayout(new BoxLayout(itemRow, BoxLayout.X_AXIS));
+            itemRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30)); // consistent height
+            itemRow.setAlignmentX(Component.LEFT_ALIGNMENT); // align to left
+            itemRow.setOpaque(false);
+            itemRow.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); 
+
+            JLabel leftLabel = new JLabel(item + " x" + qty);
+            leftLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            leftLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
+            JLabel rightLabel = new JLabel("₹" + itemTotal);
+            rightLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            rightLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+
+            itemRow.add(leftLabel);
+             itemRow.add(Box.createHorizontalGlue());
+            itemRow.add(rightLabel);
+
+            contentPanel.add(itemRow);
+            contentPanel.add(Box.createRigidArea(new Dimension(0, 10))); // adds spacing between rows
         }
 
-        rightPanel.revalidate();
-        rightPanel.repaint();
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Adds vertical spacing between items
+
+        totalAmount.setText("₹" + total);
+
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
+    private void resetQuantities() {
+    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "Cmt@049")) {
+        String sql = "UPDATE cafe_items SET quantity = 0";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.executeUpdate();
+        pstmt.close();
+    } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     public Dashboard(){
         setTitle("CafeHub Dashboard");
@@ -72,23 +125,16 @@ public class Dashboard extends JFrame implements ActionListener{
 
         //Left Panel
         leftPanel = new JPanel();
-        leftPanel.setPreferredSize(new Dimension(300,0));
+        leftPanel.setPreferredSize(new Dimension(283,0));
         leftPanel.setLayout(new BorderLayout());
+        
+        JPanel buttonRow = new JPanel(new BorderLayout());
 
-        JPanel buttonRow = new JPanel(new GridLayout(1, 3, 10, 10)); // 1 row, 3 columns, 10px horizontal gap
-
-        btnHome = new JButton("Home");
-        btnOrders = new JButton("Orders");
-        JButton btnSettings = new JButton("Settings");
-
+        btnHome = new JButton("Menu");
         btnHome.addActionListener(this);
-        btnOrders.addActionListener(this);
-        btnSettings.addActionListener(this);
 
         buttonRow.add(btnHome);
-        buttonRow.add(btnOrders);
-        buttonRow.add(btnSettings);
-        buttonRow.setBorder(BorderFactory.createEmptyBorder(20, 10, 5, 10));// adds 20px padding at the top of the button row
+        buttonRow.setBorder(BorderFactory.createEmptyBorder(12, 10, 5, 10));// adds 20px padding at the top of the button row
 
         leftPanel.add(buttonRow, BorderLayout.NORTH);
 
@@ -97,21 +143,62 @@ public class Dashboard extends JFrame implements ActionListener{
         mainPanel.setBackground(Color.WHITE);
 
         //right panel
-        rightPanel = new JPanel();
-       // rightPanel.setPreferredSize(new Dimension(300,0));
-        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        
+        rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setBackground(Color.lightGray);
+        rightPanel.setPreferredSize(new Dimension(300, 0));
+
+        JPanel titlePanel = new JPanel(new BorderLayout()); // Changed to BorderLayout
+        titlePanel.setPreferredSize(new Dimension(300, 40));
+        titlePanel.setMaximumSize(new Dimension(300, 40));
+        titlePanel.setBackground(Color.WHITE);
+    
         JLabel receipt = new JLabel("RECEIPT");
-        receipt.setFont(new Font("SansSerif", Font.BOLD, 10));
-        rightPanel.add(receipt);
+        receipt.setFont(new Font("SansSerif", Font.BOLD, 13));
+        receipt.setHorizontalAlignment(SwingConstants.CENTER);
+        titlePanel.add(receipt, BorderLayout.CENTER);
+    
+        contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setPreferredSize(new Dimension(300, 250));
+        contentPanel.setMaximumSize(new Dimension(300, 250));
+        contentPanel.setMinimumSize(new Dimension(300, 250));
+
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(300, 230)); // Set fixed height
+        scrollPane.setMaximumSize(new Dimension(300, 230));
+        scrollPane.setMinimumSize(new Dimension(300, 230));
+        scrollPane.setBorder(null);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); 
+
+        JPanel totalPanel = new JPanel(new BorderLayout());
+        totalPanel.setPreferredSize(new Dimension(300, 40));
+        totalPanel.setMaximumSize(new Dimension(300, 40));
+        totalPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        totalPanel.setOpaque(false);
+
+        JLabel totalLabel = new JLabel("Total:");
+        totalLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        totalAmount = new JLabel("₹0"); // reference for updates
+        totalAmount.setFont(new Font("SansSerif", Font.BOLD, 14));
+        totalAmount.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        totalPanel.add(totalLabel, BorderLayout.WEST);
+        totalPanel.add(totalAmount, BorderLayout.EAST);
+
+        rightPanel.add(totalPanel, BorderLayout.SOUTH); 
+        rightPanel.add(titlePanel, BorderLayout.NORTH);
+        rightPanel.add(scrollPane, BorderLayout.CENTER);
 
         add(topPanel, BorderLayout.NORTH);
         add(leftPanel, BorderLayout.WEST);
         add(rightPanel,BorderLayout.EAST);
+        add(mainPanel,BorderLayout.CENTER);
+        resetQuantities();
 
         setVisible(true);
-    }
-
+    } 
     @Override
     public void actionPerformed(ActionEvent e){
         if(e.getSource() == btnHome){
@@ -179,9 +266,15 @@ public class Dashboard extends JFrame implements ActionListener{
 
                         minusButton.addActionListener(ae -> {
                             updateQuantity(quantityLabel, dbName, -1);
-                             receiptMap.put(displayName, receiptMap.getOrDefault(displayName, 0) + 1);
+                            int currentQty = receiptMap.getOrDefault(displayName, 0);
+                            if (currentQty > 1) {
+                                receiptMap.put(displayName, currentQty - 1);
+                            } else {
+                                receiptMap.remove(displayName); //Remove item completely if qty is 0 or 1
+                            }
                              updateReceipt();
                         });
+
                         plusButton.addActionListener(ae -> {
                             updateQuantity(quantityLabel, dbName, +1);
                             receiptMap.put(displayName, receiptMap.getOrDefault(displayName, 0) + 1);
