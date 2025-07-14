@@ -20,7 +20,7 @@ public class Dashboard extends JFrame implements ActionListener{
 
     private void updateQuantity(JLabel quantityLabel, String dbName, int delta ) {
         try {
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "Cmt@049");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "******");
             int qty = Integer.parseInt(quantityLabel.getText()) + delta;
             if (qty < 0) return; // Prevent negative quantity
 
@@ -39,7 +39,7 @@ public class Dashboard extends JFrame implements ActionListener{
     }
 
     private int getPriceForItem(String displayName) {
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "Cmt@049")) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "******")) {
             String sql = "SELECT price FROM cafe_items WHERE name = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, displayName.replaceAll("[^a-zA-Z ]", "").trim()); // Remove emoji
@@ -98,7 +98,7 @@ public class Dashboard extends JFrame implements ActionListener{
     }
 
     private void resetQuantities() {
-    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "Cmt@049")) {
+    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "******")) {
         String sql = "UPDATE cafe_items SET quantity = 0";
         PreparedStatement pstmt = conn.prepareStatement(sql);
         pstmt.executeUpdate();
@@ -227,7 +227,7 @@ public class Dashboard extends JFrame implements ActionListener{
 
             try{
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "Cmt@049");
+                Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cafe_hub", "root", "******");
 
                 for (int i = 0; i < cafeItems.length; i++) {
                     String displayName = cafeItems[i];   // with emoji
