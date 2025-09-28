@@ -2,6 +2,8 @@
 
 A desktop-based Java Swing application for managing a simple café interface — including menu items, order tracking, quantity updates, and a live receipt panel.
 
+<img width="579" height="389" alt="Screenshot (1)" src="https://github.com/user-attachments/assets/53cc2e69-43ca-4e36-8d76-e7c9868548f7" />
+
 ---
 
 ## 🚀 Features
