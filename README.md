@@ -6,19 +6,19 @@ A desktop-based Java Swing application for managing a simple café interface —
 
 ---
 
-## 🚀 Features
+## Features
 
-- 🖥️ Interactive Dashboard UI using **Java Swing**
-- 📋 Menu panel displaying café items
-- ➕➖ Increment/decrement item quantity using buttons
-- 🔄 Real-time **database updates** using MySQL
-- 🧾 Receipt panel that displays selected items and quantity
-- 💰 Live total price calculation
-- ✅ Clean, modular structure with OOP principles
+- Interactive Dashboard UI using **Java Swing**
+- Menu panel displaying café items
+- Increment/decrement item quantity using buttons
+- Real-time **database updates** using MySQL
+- Receipt panel that displays selected items and quantity
+- Live total price calculation
+- Clean, modular structure with OOP principles
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Java Swing** – for building the GUI
 - **MySQL** – to store item quantities and prices
@@ -27,7 +27,7 @@ A desktop-based Java Swing application for managing a simple café interface —
 
 ---
 
-## 🗃️ Database Schema
+## Database Schema
 
 ```sql
 CREATE TABLE cafe_items (
